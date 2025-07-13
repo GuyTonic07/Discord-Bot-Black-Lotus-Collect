@@ -1,74 +1,11 @@
 
 import random
-import requests
-from bs4 import BeautifulSoup
 
-##################################################### WebScrapper ###############################################
-
-
-def get_deck_priceArch(decklink): #Archidekt Code
-    try:
-        # Send a request to fetch the content of the page
-        response = requests.get(decklink)
-        
-        if response.status_code == 200:
-            # Parse the content of the page
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Find the price element with the specific class
-            price_element = soup.find('span', class_='deckPrice_orange__dSAUq')
-
-            if price_element:
-                price_text = price_element.text.strip()
-                price = float(price_text[1:])  # Convert price text to float
-                if price > 0:
-                    return price  # Return the price if it's greater than zero
-                else:
-                    return None  # Return None for non-positive prices
-            else:
-                return None  # Price element not found
-        else:
-            return None  # Failed to fetch the webpage
-    except Exception as e:
-        return None  # An error occurred
-    
-#################################################Tapped out################################################
-    
-def get_deck_price_tapped(decklink): # Tappedout Code
-    try:
-        # Send a request to fetch the content of the page
-        response = requests.get(decklink)
-        
-        if response.status_code == 200:
-            # Parse the content of the page
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Find all span elements with class 'pull-right'
-            price_elements = soup.find_all('span', class_='pull-right')
-            
-            prices = []
-            
-            for element in price_elements:
-                price_text = element.text.strip()
-                
-                # Split the price range if present
-                price_range = price_text.split(' - ')
-                
-                if len(price_range) == 2:
-                    min_price = price_range[0][1:]  # Remove the dollar sign
-                    max_price = price_range[1][0:]  # Remove the dollar sign
-                    prices.append((min_price, max_price))
-                else:
-                    base_price = price_range[0][1:]  # Remove the dollar sign
-                    prices.append((base_price,))
-            
-            return prices
-        else:
-            return None  # Failed to fetch the webpage
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None  
-
+###################################################### Game Changer list ###############################################
+def get_gamechangerlist():
+    gameChangerlist1 = '<:manaw:504110722649817099>[White](<https://scryfall.com/search?q=is%3Agamechanger+color%3DW+&unique=cards&as=grid&order=color>): Drannith Magistrate, Enlightened Tutor, Humility, Smothering Tithe, Teferi’s Protection\n<:manau:1362768231579779122>[Blue](<https://scryfall.com/search?q=is%3Agamechanger+color%3Du&unique=cards&as=grid&order=color>): Consecrated Sphinx, Cyclonic Rift, Expropriate, Fierce Guardianship, Force of Will, Gifts Ungiven, Intuition, Jin-Gitaxias Core Augur, Mystical Tutor, Narset Parter of Veils, Rhystic Study, Sways of the Stars, Thassa’s Oracle, Urza Lord High Artificer\n'
+    gameChangerlist2 = '<:manab:504110722314403871>[Black](<https://scryfall.com/search?q=is%3Agamechanger+color%3Db&unique=cards&as=grid&order=color>): Bolas’s Citadel, Braids Cabal Minion, Demonic Tutor, Imperial Seal, Necropotence, Opposition Agent, Orcish Bowmasters, Tergrid God of Fright, Vampiric Tutor\n<:manar:504110722746417162>[Red](<https://scryfall.com/search?q=is%3Agamechanger+color%3Dr&unique=cards&as=grid&order=color>): Deflecting Swat, Gamble, Jeska’s Will, Underworld Breach\n<:manag:504110722343501824>[Green](<https://scryfall.com/search?q=is%3Agamechanger+color%3Dg&unique=cards&as=grid&order=color>): Natural Order, Seedborn Muse, Survival of the Fittest, Vorinclex Voice of Hunger, Worldly Tutor\n<:5c:1272218583354703982>[Multicolor](<https://scryfall.com/search?q=is%3Agamechanger+c>1&unique=cards&as=grid&order=color>): Grand Arbiter Augustin IV, Notion Thief, Yuriko the Tiger’s Shadow, Aura Shards, Winota Joiner of Forces, Kinnan Bonder of Prodigy, Coalition Victory\n<:manac:504110722331181066>[Colorless](<https://scryfall.com/search?q=is%3Agamechanger+-type%3Aland+color%3DC+&unique=cards&as=grid&order=color>): Chrome Mox, Grim Monolith, Lion’s Eye Diamond, Mana Vault, Mox Diamond, Panoptic Mirror, The One Ring\n<:manat:504110722540765204>[Land](<https://scryfall.com/search?q=is%3Agamechanger+type%3Aland+&unique=cards&as=grid&order=color>): Gaea’s Cradle, Ancient Tomb, Field of the Dead, Glacial Chasm, Mishra’s Workshop, The Tabernacle at Pendrell Vale\n'
+    return (gameChangerlist1,gameChangerlist2)
 
 ##################################################### Quotes ###############################################
 def get_response():
@@ -140,9 +77,19 @@ def get_response():
         "Do you know what happens when a toad is hit by lightning?",  # Storm - X-Men (2000)
         "“your blood will water the foundation of my new universe”", # Wizard 101
         "if this relationship is gonna work out, I need to feel free to party with a bunch of strangers whenever I feel like it", # The lego movie
+        "People already hate on you, don't do their job it makes it true" # jurrasic world rebirth 
     ]
-
     return random.choice(quote_list)
+##################################################### Quotes ###############################################
+
+
+
+
+
+
+
+
+
 
 
 

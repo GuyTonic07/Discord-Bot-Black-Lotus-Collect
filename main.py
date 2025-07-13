@@ -8,7 +8,7 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import asyncio
 from typing import Final
-from Responses import get_response, get_deck_priceArch, get_deck_price_tapped
+from Responses import get_response, get_deck_priceArch, get_deck_price_tapped,get_gamechangerlist
 from Sel import get_deck_price_moxfield
 
 
@@ -36,6 +36,14 @@ async def shutdown(ctx):
     channel = bot.get_channel(1222252767046013079) #bot testing channel
     await channel.send('logging off')
     await bot.close()
+        
+@bot.command()  # Command for the Game Changer list
+async def gamechanger(ctx):
+    gamechanger_list = []
+    gamechanger_list= get_gamechangerlist()
+    await ctx.send(gamechanger_list[0])
+    await ctx.send(gamechanger_list[1])
+    
         
 @bot.command() #for the !quote command
 async def Quote(ctx):
@@ -151,9 +159,9 @@ async def rat(ctx,):
     Response = random.choice(Respsones)
     await ctx.send(Response)
     
-    for _ in range(20):
+    for _ in range(10):
         try:
-            msg = await bot.wait_for("message", timeout=60)
+            msg = await bot.wait_for("message", timeout=20)
             await msg.add_reaction("🐀")
         except asyncio.TimeoutError:
             await ctx.send( "it is done")
@@ -201,19 +209,35 @@ async def curse(ctx, member: discord.Member):
 temp_channels = {}
 
 @bot.command()
-@commands.cooldown(1, 60, commands.BucketType.user)
+@commands.cooldown(1, 45, commands.BucketType.user)
 async def vc(ctx, *, name: str):
+    logChannel = bot.get_channel(1393818188206051419)
     user = ctx.author
 
-    # Get category by ID (your category ID)
+    def load_banned_words(filename="BannedWords.txt"):
+        try:
+            with open(filename, "r") as file:
+                return [line.strip().lower() for line in file if line.strip()]
+        except FileNotFoundError:
+            print(f"[ERROR] {filename} not found.")
+            return []
+
+    bannedWords = load_banned_words()
+
+    if any(word in name.lower() for word in bannedWords):
+        await logChannel.send(f"❌ {user} ID {user.id} Failed to create temporary voice channel: {name}❌")
+        await ctx.send(f"❌{user.mention}, that word is not allowed.")
+        return  # Stop here 
+
+    # Get category by ID
     category = ctx.guild.get_channel(1251261508994732102)
     if not category or category.type != discord.ChannelType.category:
         await ctx.send("❌ Could not find the target category.")
         return
 
-    # Create voice channel in that category
+    # Create voice channel
     channel = await ctx.guild.create_voice_channel(name, category=category)
-    await ctx.send(f"✅ {user} ID {user.id} Created temporary voice channel: {channel.name}")
+    await logChannel.send(f"✅ {user} ID {user.id} Created temporary voice channel: {channel.name}")
 
     async def monitor_channel():
         await asyncio.sleep(10)
@@ -224,6 +248,7 @@ async def vc(ctx, *, name: str):
 
     task = asyncio.create_task(monitor_channel())
     temp_channels[channel.id] = task
+
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -278,9 +303,6 @@ async def on_command_error(ctx, error):
     else:
         raise error 
 
-    
-    
 
-    
     
 bot.run(TOKEN)

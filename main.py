@@ -8,8 +8,8 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import asyncio
 from typing import Final
-from Responses import get_response, get_deck_priceArch, get_deck_price_tapped
-from Sel import get_deck_price_moxfield
+from Responses import get_response,get_gamechangerlist
+
 
 
 load_dotenv(find_dotenv()) #This is where the discord Token is hidden yall can't have this
@@ -23,7 +23,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="---", intents=intents, case_insensitive=True)
 
-#1222252767046013079 ID for my personal server
+# ID for my personal server
 @bot.event # on bot start up
 async def on_ready():
     channel = bot.get_channel(1222252767046013079) #bot testing channel
@@ -36,6 +36,14 @@ async def shutdown(ctx):
     channel = bot.get_channel(1222252767046013079) #bot testing channel
     await channel.send('logging off')
     await bot.close()
+        
+@bot.command()  # Command for the Game Changer list
+async def gamechanger(ctx):
+    gamechanger_list = []
+    gamechanger_list= get_gamechangerlist()
+    await ctx.send(gamechanger_list[0])
+    await ctx.send(gamechanger_list[1])
+    
         
 @bot.command() #for the !quote command
 async def Quote(ctx):
@@ -59,7 +67,6 @@ async def speak(ctx, channel_id: int, *, message: str):
     except Exception as e:
         await ctx.send(f"Failed to send message: {e}")
 
-    
 @bot.command()
 @commands.has_permissions(administrator=True) 
 
@@ -75,47 +82,6 @@ async def repeat(ctx, *, args: str):
         message = args
 
     await target_channel.send(message)
-
-
-# @bot.command() #this set of commands control the webscrapper 
-# # async def pricecheck(ctx, decklink: str):
-# #     if 'scryfall.com' in decklink: #Scryfall NOT YET SUPPORTED
-# #         await ctx.send('I do not Support this yet, please ask <@645314806051766272>') #owners ID
-
-# async def pricecheck(ctx, decklink: str):    
-#     if 'deckstats.net' in decklink: #DeckStats NOT YET SUPPORTED 
-#         await ctx.send('I do not Support this yet, please ask <@645314806051766272>')#owners ID
-    
-#     elif 'moxfield.com' in decklink: #MoxField SUPPORTED
-#         price = get_deck_price_moxfield(decklink) #Calls to Sel Function
-#         if price:
-#             await ctx.send(f'Based on card kingdom \nThe price of the deck is: {price}$')
-    
-#     elif 'archidekt.com' in decklink: #Archidekt SUPPORTED 
-#         price = get_deck_priceArch(decklink)  #Calls to Soup Function
-#         if price:
-#             await ctx.send(f'Based on Card kingdom \nThe price of the deck is: {price}$')
-
-#         else:
-#             await ctx.send('Failed to retrieve the deck price from Archidekt. Please check the link and try again.')
-        
-#     elif 'tappedout.net' in decklink: #Tappedout SUPPORTED
-#         prices = get_deck_price_tapped(decklink) #Calls to soup Function
-        
-#         prices1 = prices[0]
-            
-#         prices2 = prices[1]
-        
-#         if prices:
-#             if len(prices1) == 2:
-#                 await ctx.send(f'Based on Card kingdom \nThe price of the deck is: {prices1[0]}$' + '-' + prices1[1] + '$\n'
-#                             f'Based on TCGplayer \nThe price of the deck is: {prices2[0]}$' + '-' + prices2[1] + '$')
-#             elif len(prices1) == 1:
-#                 await ctx.send(f'Based on Card kingdom \nThe price of the deck is: {prices1[0]}$' +'\n'
-#                             f'Based on TCGplayer \nThe price of the deck is: {prices2[0]}$' + '-' + prices2[1] + '$')
-                
-#         else:
-#             await ctx.send('Failed to retrieve the deck price from Tappedout. Please check the link and try again.')
             
 ############################# Moderation ################################
 
@@ -151,15 +117,13 @@ async def rat(ctx,):
     Response = random.choice(Respsones)
     await ctx.send(Response)
     
-    for _ in range(20):
+    for _ in range(10):
         try:
-            msg = await bot.wait_for("message", timeout=60)
+            msg = await bot.wait_for("message", timeout=20)
             await msg.add_reaction("🐀")
         except asyncio.TimeoutError:
             await ctx.send( "it is done")
             break
-
-
 
 @bot.command()
 @commands.cooldown(1, 500, commands.BucketType.user)
@@ -194,26 +158,40 @@ async def curse(ctx, member: discord.Member):
             except asyncio.TimeoutError:
                 await ctx.send({member.mention}, "it is done")
                 break
-
-
-            
+    
 ###########################Room Creation####################################
 temp_channels = {}
 
 @bot.command()
-@commands.cooldown(1, 60, commands.BucketType.user)
+@commands.cooldown(1, 45, commands.BucketType.user)
 async def vc(ctx, *, name: str):
+    logChannel = bot.get_channel(1393818188206051419)
     user = ctx.author
 
-    # Get category by ID (your category ID)
+    def load_banned_words(filename="BannedWords.txt"):
+        try:
+            with open(filename, "r") as file:
+                return [line.strip().lower() for line in file if line.strip()]
+        except FileNotFoundError:
+            print(f"[ERROR] {filename} not found.")
+            return []
+
+    bannedWords = load_banned_words()
+
+    if any(word in name.lower() for word in bannedWords):
+        await logChannel.send(f"❌ {user} ID {user.id} Failed to create temporary voice channel: {name}❌")
+        await ctx.send(f"❌{user.mention}, that word is not allowed.")
+        return  # Stop here 
+
+    # Get category by ID
     category = ctx.guild.get_channel(1251261508994732102)
     if not category or category.type != discord.ChannelType.category:
         await ctx.send("❌ Could not find the target category.")
         return
 
-    # Create voice channel in that category
+    # Create voice channel
     channel = await ctx.guild.create_voice_channel(name, category=category)
-    await ctx.send(f"✅ {user} ID {user.id} Created temporary voice channel: {channel.name}")
+    await logChannel.send(f"✅ {user} ID {user.id} Created temporary voice channel: {channel.name}")
 
     async def monitor_channel():
         await asyncio.sleep(10)
@@ -224,6 +202,7 @@ async def vc(ctx, *, name: str):
 
     task = asyncio.create_task(monitor_channel())
     temp_channels[channel.id] = task
+
 
 @bot.event
 async def on_voice_state_update(member, before, after):
@@ -249,7 +228,6 @@ async def on_voice_state_update(member, before, after):
     if after.channel and after.channel.id in temp_channels:
         if not temp_channels[after.channel.id].done():
             temp_channels[after.channel.id].cancel()
-
 
 ###########################Error handling####################################
 @shutdown.error
@@ -278,9 +256,4 @@ async def on_command_error(ctx, error):
     else:
         raise error 
 
-    
-    
-
-    
-    
 bot.run(TOKEN)

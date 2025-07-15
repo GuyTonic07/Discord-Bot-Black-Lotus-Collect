@@ -22,9 +22,9 @@ def get_response():
         'One second of eternity has passed',  # Doctor Who
         'Do not be sorry, be better',  # God of War
         "What counts is not necessarily the size of the dog in the fight — it's the size of the fight in the dog",  # WW2 quote
-        'You offer to the shrine but gain nothing\n',  # Risk of Rain 2
-        'You offer to the shrine but gain nothing\n',
-        'You offer to the shrine but gain nothing\n',
+        'You offer to the shrine but gain nothing\n  
+         You offer to the shrine but gain nothing\n
+         You offer to the shrine but gain nothing\n', # Risk of Rain 2
         'Dude, sucking is the first step to being sorta good at something',  # Adventure Time
         'WHY AREN’T YOU LAUGHING?',  # The Killing Joke
         'Breathe it in — that’s your own mortality',  # Batman v Superman
